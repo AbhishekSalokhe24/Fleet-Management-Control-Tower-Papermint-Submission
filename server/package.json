@@ -1,0 +1,27 @@
+{
+  "name": "fleet-management-server",
+  "version": "1.0.0",
+  "description": "Fleet Management Dashboard - Backend + Robot Simulator",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "prisma:generate": "npx prisma generate",
+    "prisma:push": "npx prisma db push",
+    "prisma:migrate": "npx prisma migrate dev",
+    "prisma:studio": "npx prisma studio",
+    "test": "node --test src/**/*.test.js"
+  },
+  "dependencies": {
+    "@prisma/client": "^5.20.0",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.0",
+    "uuid": "^10.0.0",
+    "ws": "^8.18.0",
+    "zod": "^3.23.8"
+  },
+  "devDependencies": {
+    "prisma": "^5.20.0"
+  }
+}

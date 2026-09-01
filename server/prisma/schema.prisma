@@ -1,0 +1,66 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+/// Current state of each robot in the fleet
+model Robot {
+  id        String   @id              // "r1", "r2", ...
+  type      String                     // "picker" | "hauler"
+  x         Float
+  y         Float
+  status    String                     // idle, active, on_mission, charging, blocked, error, maintenance, offline
+  battery   Float
+  lastSeen  DateTime @default(now()) @map("last_seen")
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt       @map("updated_at")
+
+  events    RobotEvent[]
+
+  @@map("robots")
+}
+
+/// Append-only log of robot telemetry events (history)
+model RobotEvent {
+  id        Int      @id @default(autoincrement())
+  robotId   String   @map("robot_id")
+  t         Float                      // seconds from simulation start
+  x         Float
+  y         Float
+  status    String
+  battery   Float
+  taskEvent String?  @map("task_event") // "task_started" | "task_completed" | null
+  timestamp DateTime @default(now())
+
+  robot     Robot    @relation(fields: [robotId], references: [id], onDelete: Cascade)
+
+  @@index([robotId, timestamp])
+  @@index([timestamp])
+  @@map("robot_events")
+}
+
+/// Pre-aggregated fleet status distribution snapshots for trend charts
+model TrendSnapshot {
+  id          Int      @id @default(autoincrement())
+  timestamp   DateTime @default(now())
+  total       Int
+  idle        Int      @default(0)
+  active      Int      @default(0)
+  onMission   Int      @default(0) @map("on_mission")
+  charging    Int      @default(0)
+  blocked     Int      @default(0)
+  error       Int      @default(0)
+  maintenance Int      @default(0)
+  offline     Int      @default(0)
+  avgBattery  Float    @default(0) @map("avg_battery")
+
+  @@index([timestamp])
+  @@map("trend_snapshots")
+}
