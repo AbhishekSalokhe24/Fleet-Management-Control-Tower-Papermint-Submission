@@ -2,6 +2,7 @@ const http = require('http');
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const fs = require('fs');
 const config = require('./config');
 const { FleetManager } = require('./simulator/fleet');
 const { FleetState } = require('./state');
