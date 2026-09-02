@@ -72,8 +72,8 @@ async function startServer() {
 
   app.use('/api/fleet', createFleetRoutes(fleetState));
   app.use('/api/trends', createTrendRoutes(fleetState, trendService));
-  app.use('/api/config', createConfigRoutes(fleetManager, wsBroadcaster));
-  app.use('/robots/history', createHistoryRoutes(historyService, fleetState));
+  app.use('/api/config', createConfigRoutes(fleetManager, wsBroadcaster, fleetState));
+  app.use('/api/history', createHistoryRoutes(historyService, fleetState));
 
   // Serve Dashboard (optional, if we put static files in dashboard/dist)
   const dashboardPath = path.resolve(__dirname, '../../dashboard/dist');

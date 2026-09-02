@@ -110,7 +110,11 @@ class FleetManager extends EventEmitter {
 
   reconfigure() {
     console.log('[fleet] Reconfiguring...');
-    this.initialize();
+    if (this.running) {
+      this.start();
+    } else {
+      this.initialize();
+    }
   }
 }
 

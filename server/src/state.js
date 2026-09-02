@@ -23,6 +23,27 @@ class FleetState {
   }
 
   /**
+   * Remove robots beyond the current fleet size from in-memory state.
+   * Called when fleet is reconfigured to a smaller size.
+   */
+  pruneRobots(fleetSize) {
+    const toRemove = [];
+    for (const id of this.current.keys()) {
+      const num = parseInt(id.replace('r', ''), 10);
+      if (num > fleetSize) {
+        toRemove.push(id);
+      }
+    }
+    for (const id of toRemove) {
+      this.current.delete(id);
+      this.staleRobots.delete(id);
+    }
+    if (toRemove.length > 0) {
+      console.log(`[state] Pruned ${toRemove.length} robots beyond fleet size ${fleetSize}`);
+    }
+  }
+
+  /**
    * Upsert a robot's state. O(1) operation.
    */
   upsert(event) {

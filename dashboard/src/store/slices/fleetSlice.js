@@ -33,11 +33,23 @@ const fleetSlice = createSlice({
       if (summary) state.summary = summary;
       state.lastUpdate = timestamp;
     },
+    pruneToFleetSize(state, action) {
+      const fleetSize = action.payload;
+      if (!fleetSize || typeof fleetSize !== 'number') return;
+      const filtered = {};
+      for (const [id, robot] of Object.entries(state.robots)) {
+        const num = parseInt(id.replace('r', ''), 10);
+        if (num <= fleetSize) {
+          filtered[id] = robot;
+        }
+      }
+      state.robots = filtered;
+    },
     setConnected(state, action) {
       state.connected = action.payload;
     }
   }
 });
 
-export const { setFleet, updateRobots, setConnected } = fleetSlice.actions;
+export const { setFleet, updateRobots, pruneToFleetSize, setConnected } = fleetSlice.actions;
 export default fleetSlice.reducer;

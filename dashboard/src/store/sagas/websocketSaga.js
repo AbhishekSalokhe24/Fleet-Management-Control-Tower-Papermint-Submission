@@ -1,6 +1,6 @@
 import { eventChannel, END } from 'redux-saga';
 import { call, put, take, fork, delay, cancel } from 'redux-saga/effects';
-import { setFleet, updateRobots, setConnected } from '../slices/fleetSlice';
+import { setFleet, updateRobots, pruneToFleetSize, setConnected } from '../slices/fleetSlice';
 import { setConfig } from '../slices/configSlice';
 import { CONSTANTS } from '../../utils/constants';
 
@@ -31,6 +31,9 @@ function createWebSocketChannel() {
             emit(updateRobots(msg));
           } else if (msg.type === 'config_changed') {
             emit(setConfig(msg.config));
+            if (msg.config?.FLEET_SIZE) {
+              emit(pruneToFleetSize(msg.config.FLEET_SIZE));
+            }
           }
         } catch (e) {
           console.error('WS message error:', e);
