@@ -2,7 +2,7 @@ const express = require('express');
 const config = require('../config');
 const authMiddleware = require('../middleware/auth');
 
-function createConfigRoutes(fleetManager, wsBroadcaster) {
+function createConfigRoutes(fleetManager, wsBroadcaster, fleetState) {
   const router = express.Router();
 
   router.get('/', (req, res) => {
@@ -37,7 +37,10 @@ function createConfigRoutes(fleetManager, wsBroadcaster) {
       return res.status(400).json({ error: 'No valid config changes provided' });
     }
 
-    if (changes.FLEET_SIZE !== undefined && fleetManager) {
+    if ((changes.FLEET_SIZE !== undefined || changes.UPDATE_INTERVAL_MS !== undefined) && fleetManager) {
+      if (changes.FLEET_SIZE !== undefined && fleetState) {
+        fleetState.pruneRobots(changes.FLEET_SIZE);
+      }
       fleetManager.reconfigure();
     }
 
@@ -45,6 +48,7 @@ function createConfigRoutes(fleetManager, wsBroadcaster) {
       const cfg = config.getAllConfig();
       const { AUTH_TOKEN, ...safeConfig } = cfg;
       wsBroadcaster.broadcastConfigChange(safeConfig);
+      wsBroadcaster.broadcastSnapshot();
     }
 
     const cfg = config.getAllConfig();

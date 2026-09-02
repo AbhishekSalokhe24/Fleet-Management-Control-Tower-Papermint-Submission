@@ -111,6 +111,27 @@ class WebSocketBroadcaster {
     }
   }
 
+  broadcastSnapshot() {
+    if (this.clients.size === 0) return;
+    const message = JSON.stringify({
+      type: 'snapshot',
+      timestamp: Date.now(),
+      robots: this.fleetState.getAll(),
+      summary: this.fleetState.getSummary(),
+    });
+    for (const client of this.clients) {
+      if (client.readyState === WebSocket.OPEN) {
+        try {
+          client.send(message);
+        } catch (e) {
+          this.clients.delete(client);
+        }
+      } else {
+        this.clients.delete(client);
+      }
+    }
+  }
+
   getClientCount() {
     return this.clients.size;
   }

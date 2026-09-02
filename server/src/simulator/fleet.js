@@ -9,7 +9,10 @@ const ROBOT_TYPES = ['picker', 'hauler'];
 // ─── Load robots.json for the first 8 canonical positions/types ──
 let CANONICAL_ROBOTS = [];
 try {
-  const robotsPath = path.resolve(__dirname, '../../../robots.json');
+  let robotsPath = path.resolve(__dirname, './robots.json');
+  if (!fs.existsSync(robotsPath)) {
+    robotsPath = path.resolve(__dirname, '../../../robots.json');
+  }
   CANONICAL_ROBOTS = JSON.parse(fs.readFileSync(robotsPath, 'utf-8'));
   console.log(`[fleet] Loaded ${CANONICAL_ROBOTS.length} canonical robots from robots.json`);
 } catch (e) {
@@ -110,7 +113,11 @@ class FleetManager extends EventEmitter {
 
   reconfigure() {
     console.log('[fleet] Reconfiguring...');
-    this.initialize();
+    if (this.running) {
+      this.start();
+    } else {
+      this.initialize();
+    }
   }
 }
 
