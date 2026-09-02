@@ -75,15 +75,34 @@ async function startServer() {
   app.use('/api/config', createConfigRoutes(fleetManager, wsBroadcaster, fleetState));
   app.use('/api/history', createHistoryRoutes(historyService, fleetState));
 
-  // Serve Dashboard (optional, if we put static files in dashboard/dist)
+  // Serve Dashboard if built, otherwise provide API welcome JSON
   const dashboardPath = path.resolve(__dirname, '../../dashboard/dist');
-  app.use(express.static(dashboardPath));
-  app.get('*', (req, res, next) => {
-    if (req.path.startsWith('/api') || req.path.startsWith('/ws') || req.path.startsWith('/robots')) {
-      return next();
-    }
-    res.sendFile(path.join(dashboardPath, 'index.html'));
-  });
+  const indexPath = path.join(dashboardPath, 'index.html');
+
+  if (fs.existsSync(indexPath)) {
+    app.use(express.static(dashboardPath));
+    app.get('*', (req, res, next) => {
+      if (req.path.startsWith('/api') || req.path.startsWith('/ws') || req.path.startsWith('/robots')) {
+        return next();
+      }
+      res.sendFile(indexPath);
+    });
+  } else {
+    app.get('/', (req, res) => {
+      res.json({
+        service: 'Fleet Management Control Tower - Backend API',
+        status: 'online',
+        endpoints: {
+          health: '/api/health',
+          fleet: '/api/fleet',
+          trends: '/api/trends',
+          history: '/api/history/:id',
+          config: '/api/config',
+          websocket: '/ws/fleet'
+        }
+      });
+    });
+  }
 
   const PORT = config.getInt('PORT', 3001);
   server.listen(PORT, () => {
